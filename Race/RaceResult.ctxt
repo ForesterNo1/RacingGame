@@ -1,0 +1,21 @@
+#BlueJ class context
+comment0.target=RaceResult
+comment0.text=\r\n\ \u041D\u0435\u0438\u0437\u043C\u0435\u043D\u044F\u0435\u043C\u044B\u0439\ \u043E\u0431\u044A\u0435\u043A\u0442\ \u0434\u0430\u043D\u043D\u044B\u0445\ (DTO)\ \u0441\ \u0440\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442\u043E\u043C\ \u043E\u0434\u043D\u043E\u0433\u043E\ \u0443\u0447\u0430\u0441\u0442\u043D\u0438\u043A\u0430.\r\n\ \u041F\u0435\u0440\u0435\u0434\u0430\u0451\u0442\u0441\u044F\ \u0438\u0437\ RaceManager\ \u0432\ ResultWorld.\r\n
+comment1.params=place\ name\ totalTimeMs\ bestLapMs
+comment1.target=RaceResult(int,\ java.lang.String,\ long,\ long)
+comment2.params=ms
+comment2.target=java.lang.String\ formatTime(long)
+comment2.text=\r\n\ \u0424\u043E\u0440\u043C\u0430\u0442\u0438\u0440\u0443\u0435\u0442\ \u043C\u0438\u043B\u043B\u0438\u0441\u0435\u043A\u0443\u043D\u0434\u044B\ \u0432\ \u0441\u0442\u0440\u043E\u043A\u0443\ "\u041C\:\u0421\u0421.\u043C\u043C".\r\n
+comment3.params=
+comment3.target=int\ getPlace()
+comment4.params=
+comment4.target=java.lang.String\ getName()
+comment5.params=
+comment5.target=long\ getTotalTimeMs()
+comment6.params=
+comment6.target=long\ getBestLapMs()
+comment7.params=
+comment7.target=java.lang.String\ getTotalTimeStr()
+comment8.params=
+comment8.target=java.lang.String\ getBestLapStr()
+numComments=9
