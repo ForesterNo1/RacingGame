@@ -2,196 +2,73 @@ import greenfoot.*;
 
 /**
  * Главное меню игры.
+ * Фон: Mainmenu.png (1920x1080).
+ * Навигация: мышь.
  *
- * Управление:
- *   Клавиши 1/2/3 — выбор режима игры.
- *   +/-            — изменить количество кругов (1–10).
- *   Enter          — начать гонку.
- *
- * Режимы:
- *   1 → Против ботов (1 игрок vs 5 ботов)
- *   2 → На время     (1 игрок)
- *   3 → 2 Игрока     (один компьютер)
+ * Кнопки (координаты кликабельных зон подобраны под спрайт Mainmenu.png):
+ *   Race  → TeamSelectWorld(MODE_VS_BOTS)
+ *   Time  → TeamSelectWorld(MODE_TIME_TRIAL)
+ *   PvP   → TeamSelectWorld(MODE_TWO_PLAYER)
+ *   Exit  → Greenfoot.stop()
  */
 public class MenuWorld extends World {
 
-    // ---------------------------------------------------------------
-    //  Константы
-    // ---------------------------------------------------------------
+    private static final int W = 1920;
+    private static final int H = 1080;
 
-    private static final int WIDTH  = 800;
-    private static final int HEIGHT = 600;
+    // Зоны кнопок [x, y, ширина, высота] — центр кнопки по спрайту Mainmenu.png
+    // Кнопки Race/Time/PvP/Exit расположены вертикально по центру (~x=594..862)
+    // Подобраны под реальный спрайт: кнопки шириной ~270px, высотой ~70px
+    private static final int BTN_X  = 594;   // левый край кнопок
+    private static final int BTN_W  = 270;   // ширина кнопки
+    private static final int BTN_H  = 68;    // высота кнопки
 
-    private static final int MIN_LAPS = 1;
-    private static final int MAX_LAPS = 10;
+    private static final int BTN_RACE_Y  = 480;
+    private static final int BTN_TIME_Y  = 565;
+    private static final int BTN_PVP_Y   = 648;
+    private static final int BTN_EXIT_Y  = 732;
 
-    private static final String[] MODE_NAMES = {
-        "1. Против ботов",
-        "2. На время",
-        "3. Два игрока"
-    };
-
-    // Цвета
-    private static final Color COLOR_BG       = new Color(15, 15, 30);
-    private static final Color COLOR_TITLE     = new Color(255, 220, 50);
-    private static final Color COLOR_SELECTED  = new Color(80, 220, 120);
-    private static final Color COLOR_NORMAL    = new Color(200, 200, 200);
-    private static final Color COLOR_DIM       = new Color(120, 120, 140);
-    private static final Color COLOR_HINT      = new Color(160, 160, 180);
-    private static final Color COLOR_OVERLAY   = new Color(0, 0, 0, 120);
-
-    // ---------------------------------------------------------------
-    //  Поля состояния
-    // ---------------------------------------------------------------
-
-    private int selectedMode = RaceWorld.MODE_VS_BOTS; // текущий выбранный режим
-    private int totalLaps    = 3;                      // количество кругов
-
-    /** Флаг для предотвращения повторных нажатий (ждём отпускания клавиши). */
-    private String lastKey = "";
-
-    // ---------------------------------------------------------------
-    //  Конструктор
-    // ---------------------------------------------------------------
+    private boolean mouseWasDown = false;
 
     public MenuWorld() {
-        super(WIDTH, HEIGHT, 1);
+        super(W, H, 1);
         Greenfoot.setSpeed(50);
-        drawMenu();
+        setBackground("images/Assets/Menu/Mainmenu.png");
+        prepare();
     }
-
-    // ---------------------------------------------------------------
-    //  Главный цикл
-    // ---------------------------------------------------------------
 
     @Override
     public void act() {
-        String key = Greenfoot.getKey(); // getKey() возвращает клавишу один раз
-        if (key == null) return;
+        MouseInfo mouse = Greenfoot.getMouseInfo();
+        boolean mouseDown = Greenfoot.mousePressed(null);
 
-        boolean changed = false;
+        // Срабатывание по отпусканию кнопки мыши (клик)
+        if (Greenfoot.mouseClicked(null) && mouse != null) {
+            int mx = mouse.getX();
+            int my = mouse.getY();
 
-        switch (key) {
-            case "1":
-                selectedMode = RaceWorld.MODE_VS_BOTS;
-                changed = true;
-                break;
-            case "2":
-                selectedMode = RaceWorld.MODE_TIME_TRIAL;
-                changed = true;
-                break;
-            case "3":
-                selectedMode = RaceWorld.MODE_TWO_PLAYER;
-                changed = true;
-                break;
-            case "equals": // клавиша "=" / "+"
-            case "plus":
-                if (totalLaps < MAX_LAPS) { totalLaps++; changed = true; }
-                break;
-            case "minus":
-                if (totalLaps > MIN_LAPS) { totalLaps--; changed = true; }
-                break;
-            case "enter":
-                startRace();
-                return;
-        }
-
-        if (changed) {
-            drawMenu();
+            if (inButton(mx, my, BTN_RACE_Y)) {
+                Greenfoot.setWorld(new TeamSelectWorld(RaceWorld.MODE_VS_BOTS));
+            } else if (inButton(mx, my, BTN_TIME_Y)) {
+                Greenfoot.setWorld(new TeamSelectWorld(RaceWorld.MODE_TIME_TRIAL));
+            } else if (inButton(mx, my, BTN_PVP_Y)) {
+                Greenfoot.setWorld(new TeamSelectWorld(RaceWorld.MODE_TWO_PLAYER));
+            } else if (inButton(mx, my, BTN_EXIT_Y)) {
+                Greenfoot.stop();
+            }
         }
     }
 
-    // ---------------------------------------------------------------
-    //  Запуск гонки
-    // ---------------------------------------------------------------
-
-    private void startRace() {
-        Greenfoot.setWorld(new RaceWorld(selectedMode, totalLaps));
+    /** Проверяет, попадает ли точка (mx, my) в кнопку с заданным Y. */
+    private boolean inButton(int mx, int my, int btnY) {
+        return mx >= BTN_X && mx <= BTN_X + BTN_W
+        && my >= btnY  && my <= btnY + BTN_H;
     }
-
-    // ---------------------------------------------------------------
-    //  Отрисовка меню
-    // ---------------------------------------------------------------
-
-    private void drawMenu() {
-        GreenfootImage img = new GreenfootImage(WIDTH, HEIGHT);
-
-        // Фон
-        img.setColor(COLOR_BG);
-        img.fill();
-
-        // Декоративные полосы
-        img.setColor(new Color(30, 30, 60));
-        for (int y = 0; y < HEIGHT; y += 40) {
-            img.fillRect(0, y, WIDTH, 2);
-        }
-
-        // Заголовок
-        drawCenteredText(img, "ГОНКИ", 130, new Font("Arial", true, false, 72), COLOR_TITLE);
-        drawCenteredText(img, "Top-Down Racing", 175, new Font("Arial", false, true, 22), COLOR_DIM);
-
-        // Разделитель
-        img.setColor(COLOR_TITLE);
-        img.fillRect(200, 195, 400, 2);
-
-        // Выбор режима
-        drawCenteredText(img, "Выберите режим:", 240, new Font("Arial", false, false, 18), COLOR_HINT);
-
-        int yMode = 275;
-        for (int i = 0; i < MODE_NAMES.length; i++) {
-            boolean isSelected = (i == selectedMode);
-            Color c = isSelected ? COLOR_SELECTED : COLOR_NORMAL;
-            Font  f = new Font("Arial", isSelected, false, isSelected ? 22 : 20);
-
-            String prefix = isSelected ? "▶ " : "  ";
-            drawCenteredText(img, prefix + MODE_NAMES[i], yMode + i * 42, f, c);
-        }
-
-        // Разделитель
-        img.setColor(new Color(50, 50, 80));
-        img.fillRect(200, 405, 400, 1);
-
-        // Количество кругов
-        drawCenteredText(img, "Кругов: " + totalLaps, 440,
-            new Font("Arial", true, false, 24), COLOR_SELECTED);
-        drawCenteredText(img, "Изменить: клавиши  +  /  -", 468,
-            new Font("Arial", false, false, 14), COLOR_DIM);
-
-        // Подсказки
-        img.setColor(new Color(40, 40, 70));
-        img.fillRect(0, HEIGHT - 80, WIDTH, 80);
-
-        drawCenteredText(img, "Клавиши 1 / 2 / 3 — режим     Enter — старт", HEIGHT - 50,
-            new Font("Arial", false, false, 15), COLOR_HINT);
-
-        // Описание текущего режима
-        String desc = getModeDescription(selectedMode);
-        drawCenteredText(img, desc, HEIGHT - 25,
-            new Font("Arial", false, true, 13), COLOR_DIM);
-
-        setBackground(img);
-    }
-
-    // ---------------------------------------------------------------
-    //  Вспомогательные методы отрисовки
-    // ---------------------------------------------------------------
-
-    private void drawCenteredText(GreenfootImage img, String text, int y, Font font, Color color) {
-        GreenfootImage tmp = new GreenfootImage(text, font.getSize(), color, new Color(0,0,0,0));
-        int x = (WIDTH - tmp.getWidth()) / 2;
-        img.drawImage(tmp, x, y - tmp.getHeight() / 2);
-    }
-
-    private String getModeDescription(int mode) {
-        switch (mode) {
-            case RaceWorld.MODE_VS_BOTS:
-                return "Стрелки — управление. Обгони 5 ботов!";
-            case RaceWorld.MODE_TIME_TRIAL:
-                return "Стрелки — управление. Установи лучшее время!";
-            case RaceWorld.MODE_TWO_PLAYER:
-                return "Игрок 1: Стрелки  |  Игрок 2: W/A/S/D";
-            default:
-                return "";
-        }
+    /**
+     * Prepare the world for the start of the program.
+     * That is: create the initial objects and add them to the world.
+     */
+    private void prepare()
+    {
     }
 }

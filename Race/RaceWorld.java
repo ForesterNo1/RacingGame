@@ -3,18 +3,19 @@ import java.util.*;
 
 /**
  * Игровой мир — гоночная трасса.
+ * Разрешение: 1920x1080.
  *
- * Реализация разработчика Б:
- *   - Загрузка фона трассы.
- *   - Расстановка чекпоинтов (setupCheckpoints).
- *   - Создание RaceManager, который сам создаёт машины и LapTimer.
- *   - Проверка offRoad по цвету пикселя фона.
- *   - Отображение простого HUD (круг, лучшее время).
+ * Получает из TrackSelectWorld:
+ *   - gameMode    : режим игры
+ *   - totalLaps   : 3 (Race/PvP) или 2 (Time: 1 прогр. + 1 зачётный)
+ *   - trackIndex  : выбранная трасса (0/1/2)
+ *   - player1Team : команда игрока 1
+ *   - player2Team : команда игрока 2 (или -1)
  */
 public class RaceWorld extends World {
 
     // ---------------------------------------------------------------
-    //  Константы режимов
+    //  Режимы игры
     // ---------------------------------------------------------------
 
     public static final int MODE_VS_BOTS    = 0;
@@ -25,57 +26,53 @@ public class RaceWorld extends World {
     //  Детектирование дороги по цвету пикселя
     // ---------------------------------------------------------------
 
-    /**
-     * Порог для определения "серого" пикселя дороги.
-     * Пиксель считается дорогой, если все каналы (R, G, B) находятся
-     * в диапазоне [ROAD_MIN, ROAD_MAX] и разница между каналами < ROAD_DIFF.
-     * Настройте под конкретную текстуру трассы.
-     */
-    private static final int ROAD_MIN  = 60;
-    private static final int ROAD_MAX  = 200;
-    private static final int ROAD_DIFF = 40; // максимальная разница R-G-B (серость)
+    private static final int ROAD_MIN  = 30;
+    private static final int ROAD_MAX  = 80;
+    private static final int ROAD_DIFF = 25;
 
     // ---------------------------------------------------------------
-    //  HUD — параметры отображения
+    //  HUD
     // ---------------------------------------------------------------
 
-    private static final int HUD_X      = 10;
-    private static final int HUD_Y      = 10;
-    private static final int HUD_WIDTH  = 200;
-    private static final int HUD_LINE_H = 20;
+    private static final int HUD_X     = 20;
+    private static final int HUD_Y     = 20;
+    private static final int HUD_LINE  = 28;
 
     // ---------------------------------------------------------------
     //  Поля
     // ---------------------------------------------------------------
 
-    private final int         gameMode;
-    private       RaceManager raceManager;
-    private       boolean     raceFinished = false;
+    private final int gameMode;
+    private final int trackIndex;
+    private final int player1Team;
+    private final int player2Team;
 
-    /** Кешированное изображение фона для getColorAt(). */
-    private GreenfootImage trackImage;
+    private RaceManager raceManager;
+    private boolean     raceFinished = false;
+
+    private GreenfootImage trackImage;   // кеш для getColorAt
 
     // ---------------------------------------------------------------
     //  Конструкторы
     // ---------------------------------------------------------------
 
+    /** Используется Greenfoot-редактором для быстрого запуска. */
     public RaceWorld() {
-        this(MODE_VS_BOTS, 3);
+        this(MODE_VS_BOTS, 3, TrackSelectWorld.TRACK_IGORA,
+             TeamSelectWorld.TEAM_FERRARI, -1);
     }
 
-    public RaceWorld(int mode) {
-        this(mode, 3);
-    }
+    public RaceWorld(int mode, int totalLaps, int trackIndex,
+                     int player1Team, int player2Team) {
+        super(1920, 1080, 1);
+        this.gameMode    = mode;
+        this.trackIndex  = trackIndex;
+        this.player1Team = player1Team;
+        this.player2Team = player2Team;
 
-    public RaceWorld(int mode, int totalLaps) {
-        super(800, 600, 1);
-        this.gameMode = mode;
-
-        // Загружаем фоновое изображение трассы
         loadTrack();
 
-        // Создаём менеджер гонки и запускаем всё
-        raceManager = new RaceManager(this, mode, totalLaps);
+        raceManager = new RaceManager(this, mode, totalLaps, player1Team, player2Team);
         raceManager.setupRace();
     }
 
@@ -84,60 +81,73 @@ public class RaceWorld extends World {
     // ---------------------------------------------------------------
 
     private void loadTrack() {
+        String file = TrackSelectWorld.TRACK_FILES[trackIndex];
         try {
-            trackImage = new GreenfootImage("track_1.png");
-            setBackground(new GreenfootImage("track_1.png")); // фон мира (не модифицируем)
+            trackImage = new GreenfootImage(file);
+            // Масштабируем под 1920x1080 если нужно
+            trackImage.scale(1920, 1080);
+            setBackground(new GreenfootImage(trackImage));
         } catch (Exception e) {
-            // Если файл не найден — рисуем простую трассу программно
             trackImage = createFallbackTrack();
-            setBackground(new GreenfootImage(trackImage)); // копия для фона
+            setBackground(new GreenfootImage(trackImage));
         }
     }
 
-    /**
-     * Создаёт простейший фоллбэк-трек программно, если track_1.png отсутствует.
-     * Серый прямоугольник-кольцо на зелёном фоне.
-     */
     private GreenfootImage createFallbackTrack() {
-        GreenfootImage img = new GreenfootImage(800, 600);
-
-        // Фон — зелёный (трава / off-road)
+        GreenfootImage img = new GreenfootImage(1920, 1080);
         img.setColor(new Color(34, 139, 34));
         img.fill();
-
-        // Внешний контур трека — тёмно-серый
-        img.setColor(new Color(100, 100, 100));
-        img.fillOval(50, 50, 700, 500);
-
-        // Внутренний вырез — зелёный
+        img.setColor(new Color(60, 60, 60));
+        img.fillOval(100, 100, 1720, 880);
         img.setColor(new Color(34, 139, 34));
-        img.fillOval(150, 130, 500, 340);
-
-        // Белая финишная черта
+        img.fillOval(300, 220, 1320, 640);
         img.setColor(Color.WHITE);
-        img.fillRect(330, 460, 60, 8);
-
+        img.fillRect(880, 880, 160, 12);
         return img;
     }
 
     // ---------------------------------------------------------------
-    //  Создание чекпоинтов — возвращает список для LapTimer
+    //  Чекпоинты — координаты под каждую трассу
     // ---------------------------------------------------------------
 
     /**
-     * Создаёт чекпоинты и добавляет их в мир.
-     * Координаты соответствуют трассе (кольцу).
-     *
-     * @return список чекпоинтов в порядке прохождения (order: 0, 1, 2, ...)
+     * Создаёт и добавляет чекпоинты для выбранной трассы.
+     * Координаты подобраны под каждый трек при масштабе 1920x1080.
      */
     public List<Checkpoint> setupCheckpoints() {
-        // Координаты чекпоинтов по кольцу трека (по часовой стрелке)
-        int[][] positions = {
-            {400, 470},  // 0 — стартовый (чуть выше финишной черты)
-            {680, 300},  // 1 — правая часть
-            {400, 100},  // 2 — верхняя часть
-            {120, 300},  // 3 — левая часть
-        };
+        int[][] positions;
+
+        switch (trackIndex) {
+            case TrackSelectWorld.TRACK_SILVERSTONE:
+                positions = new int[][] {
+                    {960, 950},   // 0 — старт (низ)
+                    {1700, 700},  // 1 — правый низ
+                    {1600, 200},  // 2 — правый верх
+                    {960, 150},   // 3 — верх центр
+                    {300, 300},   // 4 — левый верх
+                    {220, 700},   // 5 — левый низ
+                };
+                break;
+            case TrackSelectWorld.TRACK_SOCHI:
+                positions = new int[][] {
+                    {1400, 900},  // 0 — старт
+                    {1700, 600},  // 1
+                    {1400, 250},  // 2
+                    {800,  250},  // 3
+                    {400,  500},  // 4
+                    {700,  900},  // 5
+                };
+                break;
+            default: // IGORA
+                positions = new int[][] {
+                    {960,  900},  // 0 — старт
+                    {1600, 600},  // 1
+                    {1400, 200},  // 2
+                    {600,  200},  // 3
+                    {300,  600},  // 4
+                };
+                break;
+        }
 
         List<Checkpoint> list = new ArrayList<>();
         for (int i = 0; i < positions.length; i++) {
@@ -149,82 +159,51 @@ public class RaceWorld extends World {
     }
 
     // ---------------------------------------------------------------
-    //  Главный цикл мира
+    //  Главный цикл
     // ---------------------------------------------------------------
 
     @Override
     public void act() {
         if (raceFinished) return;
 
-        // Обновляем менеджер (проверяет финиши)
         raceManager.update();
-
-        // Проверяем offRoad для каждой машины
         checkOffRoad();
-
-        // Обновляем HUD
         drawHUD();
 
-        // Если гонка завершилась — фиксируем
         if (raceManager.isRaceFinished()) {
             raceFinished = true;
         }
     }
 
     // ---------------------------------------------------------------
-    //  Проверка offRoad по цвету пикселя
+    //  Off-road детектирование
     // ---------------------------------------------------------------
 
-    /**
-     * Для каждой машины проверяет цвет пикселя трека под её позицией.
-     * Если цвет не соответствует дороге — вызывает car.setOffRoad(true).
-     */
     private void checkOffRoad() {
         @SuppressWarnings("unchecked")
         List<Car> cars = (List<Car>) getObjects(Car.class);
         if (cars == null) return;
 
         for (Car car : cars) {
-            int x = car.getX();
-            int y = car.getY();
-
-            // Проверяем границы
-            if (x < 0 || y < 0 || x >= trackImage.getWidth() || y >= trackImage.getHeight()) {
-                car.setOffRoad(true);
-                continue;
-            }
-
+            int x = Math.max(0, Math.min(car.getX(), trackImage.getWidth()  - 1));
+            int y = Math.max(0, Math.min(car.getY(), trackImage.getHeight() - 1));
             Color pixel = trackImage.getColorAt(x, y);
             car.setOffRoad(!isRoadPixel(pixel));
         }
     }
 
-    /**
-     * Определяет, является ли пиксель дорогой.
-     * Дорога — оттенок серого в определённом диапазоне.
-     */
     private boolean isRoadPixel(Color c) {
-        int r = c.getRed();
-        int g = c.getGreen();
-        int b = c.getBlue();
-
-        // Серый = R ≈ G ≈ B
-        int maxDiff = Math.max(Math.abs(r - g), Math.max(Math.abs(r - b), Math.abs(g - b)));
+        int r = c.getRed(), g = c.getGreen(), b = c.getBlue();
+        int maxDiff = Math.max(Math.abs(r-g), Math.max(Math.abs(r-b), Math.abs(g-b)));
         if (maxDiff > ROAD_DIFF) return false;
-
-        // В нужном диапазоне яркости
         int avg = (r + g + b) / 3;
         return avg >= ROAD_MIN && avg <= ROAD_MAX;
     }
 
     // ---------------------------------------------------------------
-    //  HUD (отображение информации)
+    //  HUD
     // ---------------------------------------------------------------
 
-    /**
-     * Рисует простой HUD поверх фона.
-     * Отображает: текущий круг и лучшее время круга для первого игрока.
-     */
     private void drawHUD() {
         LapTimer timer = raceManager.getLapTimer();
         if (timer == null) return;
@@ -234,44 +213,51 @@ public class RaceWorld extends World {
 
         GreenfootImage bg = getBackground();
 
-        // Сбрасываем HUD-область (перерисовываем фон в прямоугольнике HUD)
-        // Для простоты рисуем полупрозрачный прямоугольник
-        GreenfootImage hudPanel = new GreenfootImage(HUD_WIDTH, HUD_LINE_H * 4 + 10);
-        hudPanel.setColor(new Color(0, 0, 0, 160));
-        hudPanel.fill();
-        bg.drawImage(hudPanel, HUD_X, HUD_Y);
+        // Фон HUD
+        int hudH = players.size() * HUD_LINE * 5 + 20;
+        GreenfootImage panel = new GreenfootImage(260, hudH);
+        panel.setColor(new Color(0, 0, 0, 170));
+        panel.fill();
+        bg.drawImage(panel, HUD_X, HUD_Y);
 
-        bg.setColor(Color.WHITE);
-        bg.setFont(new Font("Arial", false, false, 14));
+        bg.setFont(new Font("Arial", true, false, 20));
 
         for (int i = 0; i < players.size(); i++) {
-            PlayerCar p = players.get(i);
-            int lap     = timer.getCurrentLap(p);
-            long best   = timer.getBestLapTime(p);
-            long total  = timer.getTotalRaceTime(p);
+            PlayerCar p   = players.get(i);
+            int yOff      = HUD_Y + 10 + i * HUD_LINE * 5;
+            int lap       = timer.getCurrentLap(p);
+            int totalLaps = timer.getTotalLaps();
+            long best     = timer.getBestLapTime(p);
+            long total    = timer.getTotalRaceTime(p);
 
-            int yOff = HUD_Y + 12 + i * (HUD_LINE_H * 3);
+            // Для Time Trial: прогревочный круг — особая метка
+            String lapLabel;
+            if (gameMode == MODE_TIME_TRIAL && lap == 1) {
+                lapLabel = "ПРОГРЕВ";
+            } else {
+                int displayLap = (gameMode == MODE_TIME_TRIAL) ? lap - 1 : lap;
+                int displayTotal = (gameMode == MODE_TIME_TRIAL) ? totalLaps - 1 : totalLaps;
+                lapLabel = "Круг " + Math.min(displayLap, displayTotal) + "/" + displayTotal;
+            }
 
-            String header   = "Игрок " + p.getPlayerNumber();
-            String lapStr   = "Круг: " + Math.min(lap, timer.getTotalLaps()) + "/" + timer.getTotalLaps();
-            String bestStr  = "Лучший: " + RaceResult.formatTime(best);
-            String totalStr = "Время: " + RaceResult.formatTime(total);
-
-            bg.drawString(header,   HUD_X + 5, yOff);
-            bg.drawString(lapStr,   HUD_X + 5, yOff + HUD_LINE_H);
-            bg.drawString(bestStr,  HUD_X + 5, yOff + HUD_LINE_H * 2);
-            bg.drawString(totalStr, HUD_X + 5, yOff + HUD_LINE_H * 3);
+            bg.setColor(Color.WHITE);
+            bg.drawString("Игрок " + p.getPlayerNumber(), HUD_X + 8, yOff + HUD_LINE);
+            bg.drawString(lapLabel,                       HUD_X + 8, yOff + HUD_LINE * 2);
+            bg.drawString("Лучший: " + RaceResult.formatTime(best),  HUD_X + 8, yOff + HUD_LINE * 3);
+            bg.drawString("Время:  " + RaceResult.formatTime(total), HUD_X + 8, yOff + HUD_LINE * 4);
         }
 
         setBackground(bg);
     }
 
     // ---------------------------------------------------------------
-    //  Геттеры и сеттеры
+    //  Геттеры
     // ---------------------------------------------------------------
 
-    public RaceManager getRaceManager()  { return raceManager; }
-    public int         getGameMode()     { return gameMode; }
-    public boolean     isRaceFinished()  { return raceFinished; }
-    public void        setRaceFinished(boolean v) { this.raceFinished = v; }
+    public RaceManager getRaceManager() { return raceManager; }
+    public int  getGameMode()           { return gameMode; }
+    public boolean isRaceFinished()     { return raceFinished; }
+    public int  getTrackIndex()         { return trackIndex; }
+    public int  getPlayer1Team()        { return player1Team; }
+    public int  getPlayer2Team()        { return player2Team; }
 }

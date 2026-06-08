@@ -1,0 +1,12 @@
+#BlueJ class context
+comment0.target=TrackSelectWorld
+comment0.text=\r\n\ \u042D\u043A\u0440\u0430\u043D\ \u0432\u044B\u0431\u043E\u0440\u0430\ \u0442\u0440\u0430\u0441\u0441\u044B.\r\n\ \u0424\u043E\u043D\:\ Choosetrack.png\ (1920x1080).\r\n\r\n\ \u0422\u0440\u0438\ \u0442\u0440\u0430\u0441\u0441\u044B\:\ \u0418\u0433\u043E\u0440\u0430\ \u0414\u0440\u0430\u0439\u0432,\ Silverstone,\ \u0421\u043E\u0447\u0438.\r\n\ \u0424\u0430\u0439\u043B\u044B\ \u0444\u043E\u043D\u043E\u0432\ \u0442\u0440\u0430\u0441\u0441\:\ Igora.png,\ Silverstone.png,\ Sochi.png\r\n\r\n\ \u041F\u043E\u0441\u043B\u0435\ \u0432\u044B\u0431\u043E\u0440\u0430\ \u2192\ RaceWorld\r\n
+comment1.params=gameMode\ player1Team\ player2Team
+comment1.target=TrackSelectWorld(int,\ int,\ int)
+comment2.params=
+comment2.target=void\ act()
+comment3.params=track
+comment3.target=void\ startRace(int)
+comment4.params=mx\ my\ cardX
+comment4.target=boolean\ inCard(int,\ int,\ int)
+numComments=5
