@@ -18,8 +18,8 @@ import greenfoot.*;
  */
 public class TeamSelectWorld extends World {
 
-    private static final int W = 1920;
-    private static final int H = 1080;
+    private static final int W = 1280;
+    private static final int H = 720;
 
     // -------------------------------------------------------------------
     //  Константы команд
@@ -46,13 +46,13 @@ public class TeamSelectWorld extends World {
     //  Карточки примерно: x=75, x=660, x=1245 (по левому краю), y=280..750
     // -------------------------------------------------------------------
 
-    private static final int CARD_Y = 278;
-    private static final int CARD_H = 460;
-    private static final int CARD_W = 440;
+    private static final int CARD_Y = 185;
+    private static final int CARD_H = 307;
+    private static final int CARD_W = 293;
 
-    private static final int CARD_ASTON_X  = 75;
-    private static final int CARD_FERRARI_X = 740;
-    private static final int CARD_REDBULL_X = 1405;
+    private static final int CARD_ASTON_X  = 50;
+    private static final int CARD_FERRARI_X = 493;
+    private static final int CARD_REDBULL_X = 937;
 
     // -------------------------------------------------------------------
     //  Поля

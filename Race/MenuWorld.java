@@ -13,20 +13,19 @@ import greenfoot.*;
  */
 public class MenuWorld extends World {
 
-    private static final int W = 1920;
-    private static final int H = 1080;
+    private static final int W = 1280;
+    private static final int H = 720;
 
     // Зоны кнопок [x, y, ширина, высота] — центр кнопки по спрайту Mainmenu.png
-    // Кнопки Race/Time/PvP/Exit расположены вертикально по центру (~x=594..862)
-    // Подобраны под реальный спрайт: кнопки шириной ~270px, высотой ~70px
-    private static final int BTN_X  = 594;   // левый край кнопок
-    private static final int BTN_W  = 270;   // ширина кнопки
-    private static final int BTN_H  = 68;    // высота кнопки
+    // Координаты масштабированы с оригинала 1920x1080 (коэффициент 0.6667)
+    private static final int BTN_X  = 396;   // левый край кнопок
+    private static final int BTN_W  = 180;   // ширина кнопки
+    private static final int BTN_H  = 45;    // высота кнопки
 
-    private static final int BTN_RACE_Y  = 480;
-    private static final int BTN_TIME_Y  = 565;
-    private static final int BTN_PVP_Y   = 648;
-    private static final int BTN_EXIT_Y  = 732;
+    private static final int BTN_RACE_Y  = 320;
+    private static final int BTN_TIME_Y  = 377;
+    private static final int BTN_PVP_Y   = 432;
+    private static final int BTN_EXIT_Y  = 488;
 
     private boolean mouseWasDown = false;
 

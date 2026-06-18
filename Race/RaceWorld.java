@@ -3,7 +3,7 @@ import java.util.*;
 
 /**
  * Игровой мир — гоночная трасса.
- * Разрешение: 1920x1080.
+ * Разрешение: 1280x720.
  *
  * Получает из TrackSelectWorld:
  *   - gameMode    : режим игры
@@ -34,9 +34,9 @@ public class RaceWorld extends World {
     //  HUD
     // ---------------------------------------------------------------
 
-    private static final int HUD_X     = 20;
-    private static final int HUD_Y     = 20;
-    private static final int HUD_LINE  = 28;
+    private static final int HUD_X     = 13;
+    private static final int HUD_Y     = 13;
+    private static final int HUD_LINE  = 19;
 
     // ---------------------------------------------------------------
     //  Поля
@@ -64,7 +64,7 @@ public class RaceWorld extends World {
 
     public RaceWorld(int mode, int totalLaps, int trackIndex,
                      int player1Team, int player2Team) {
-        super(1920, 1080, 1);
+        super(1280, 720, 1);
         this.gameMode    = mode;
         this.trackIndex  = trackIndex;
         this.player1Team = player1Team;
@@ -84,8 +84,8 @@ public class RaceWorld extends World {
         String file = TrackSelectWorld.TRACK_FILES[trackIndex];
         try {
             trackImage = new GreenfootImage(file);
-            // Масштабируем под 1920x1080 если нужно
-            trackImage.scale(1920, 1080);
+            // Масштабируем под 1280x720
+            trackImage.scale(1280, 720);
             setBackground(new GreenfootImage(trackImage));
         } catch (Exception e) {
             trackImage = createFallbackTrack();
@@ -94,15 +94,15 @@ public class RaceWorld extends World {
     }
 
     private GreenfootImage createFallbackTrack() {
-        GreenfootImage img = new GreenfootImage(1920, 1080);
+        GreenfootImage img = new GreenfootImage(1280, 720);
         img.setColor(new Color(34, 139, 34));
         img.fill();
         img.setColor(new Color(60, 60, 60));
-        img.fillOval(100, 100, 1720, 880);
+        img.fillOval(67, 67, 1147, 587);
         img.setColor(new Color(34, 139, 34));
-        img.fillOval(300, 220, 1320, 640);
+        img.fillOval(200, 147, 880, 427);
         img.setColor(Color.WHITE);
-        img.fillRect(880, 880, 160, 12);
+        img.fillRect(587, 587, 107, 8);
         return img;
     }
 
@@ -112,7 +112,7 @@ public class RaceWorld extends World {
 
     /**
      * Создаёт и добавляет чекпоинты для выбранной трассы.
-     * Координаты подобраны под каждый трек при масштабе 1920x1080.
+     * Координаты подобраны под каждый трек при масштабе 1280x720.
      */
     public List<Checkpoint> setupCheckpoints() {
         int[][] positions;
@@ -120,31 +120,31 @@ public class RaceWorld extends World {
         switch (trackIndex) {
             case TrackSelectWorld.TRACK_SILVERSTONE:
                 positions = new int[][] {
-                    {960, 950},   // 0 — старт (низ)
-                    {1700, 700},  // 1 — правый низ
-                    {1600, 200},  // 2 — правый верх
-                    {960, 150},   // 3 — верх центр
-                    {300, 300},   // 4 — левый верх
-                    {220, 700},   // 5 — левый низ
+                    {640, 633},   // 0 — старт (низ)
+                    {1133, 467},  // 1 — правый низ
+                    {1067, 133},  // 2 — правый верх
+                    {640, 100},   // 3 — верх центр
+                    {200, 200},   // 4 — левый верх
+                    {147, 467},   // 5 — левый низ
                 };
                 break;
             case TrackSelectWorld.TRACK_SOCHI:
                 positions = new int[][] {
-                    {1400, 900},  // 0 — старт
-                    {1700, 600},  // 1
-                    {1400, 250},  // 2
-                    {800,  250},  // 3
-                    {400,  500},  // 4
-                    {700,  900},  // 5
+                    {933, 600},   // 0 — старт
+                    {1133, 400},  // 1
+                    {933, 167},   // 2
+                    {533, 167},   // 3
+                    {267, 333},   // 4
+                    {467, 600},   // 5
                 };
                 break;
             default: // IGORA
                 positions = new int[][] {
-                    {960,  900},  // 0 — старт
-                    {1600, 600},  // 1
-                    {1400, 200},  // 2
-                    {600,  200},  // 3
-                    {300,  600},  // 4
+                    {640, 600},   // 0 — старт
+                    {1067, 400},  // 1
+                    {933, 133},   // 2
+                    {400, 133},   // 3
+                    {200, 400},   // 4
                 };
                 break;
         }
@@ -214,13 +214,13 @@ public class RaceWorld extends World {
         GreenfootImage bg = getBackground();
 
         // Фон HUD
-        int hudH = players.size() * HUD_LINE * 5 + 20;
-        GreenfootImage panel = new GreenfootImage(260, hudH);
+        int hudH = players.size() * HUD_LINE * 5 + 13;
+        GreenfootImage panel = new GreenfootImage(173, hudH);
         panel.setColor(new Color(0, 0, 0, 170));
         panel.fill();
         bg.drawImage(panel, HUD_X, HUD_Y);
 
-        bg.setFont(new Font("Arial", true, false, 20));
+        bg.setFont(new Font("Arial", true, false, 14));
 
         for (int i = 0; i < players.size(); i++) {
             PlayerCar p   = players.get(i);

@@ -17,11 +17,11 @@ public class RaceManager {
     //  Стартовые позиции (3 слота — для трёх машин в Race)
     // ---------------------------------------------------------------
 
-    private static final int START_X_1 = 930;   // левая колонка
-    private static final int START_X_2 = 990;   // правая колонка
+    private static final int START_X_1 = 620;   // левая колонка
+    private static final int START_X_2 = 660;   // правая колонка
 
-    private static final int START_Y_1 = 940;   // первый ряд (ближе к финишной черте)
-    private static final int START_Y_2 = 980;   // второй ряд
+    private static final int START_Y_1 = 627;   // первый ряд (ближе к финишной черте)
+    private static final int START_Y_2 = 653;   // второй ряд
 
     // ---------------------------------------------------------------
     //  Поля

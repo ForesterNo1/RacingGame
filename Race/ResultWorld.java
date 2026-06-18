@@ -10,19 +10,19 @@ import java.util.List;
  *   MODE_TWO_PLAYER → P1win.png или P2win.png (в зависимости от победителя)
  *
  * Кнопка "В меню" — навигация мышью.
- * Размер: 1920x1080.
+ * Размер: 1280x720.
  */
 public class ResultWorld extends World {
 
-    private static final int W = 1920;
-    private static final int H = 1080;
+    private static final int W = 1280;
+    private static final int H = 720;
 
     // Зона кнопки "В меню" — подобрана под спрайты Win/Timewin/P1win/P2win
-    // Кнопка по центру экрана, примерно y=600..680
-    private static final int BTN_W = 340;
-    private static final int BTN_H = 80;
+    // Координаты масштабированы с оригинала 1920x1080 (коэффициент 0.6667)
+    private static final int BTN_W = 227;
+    private static final int BTN_H = 53;
     private static final int BTN_X = (W - BTN_W) / 2;   // центр по X
-    private static final int BTN_Y = 600;
+    private static final int BTN_Y = 400;
 
     // ---------------------------------------------------------------
     //  Поля
@@ -93,8 +93,8 @@ public class ResultWorld extends World {
         // Спрайт Timewin.png: "Ваше время:" ~ y=350
         // Спрайты P1win/P2win: имя ~ y=300
 
-        int textY = 460;  // Y для результата (подогнать если нужно)
-        Font font = new Font("Arial", true, false, 52);
+        int textY = 307;  // Y для результата (подогнать если нужно)
+        Font font = new Font("Arial", true, false, 35);
 
         String value;
         switch (gameMode) {
