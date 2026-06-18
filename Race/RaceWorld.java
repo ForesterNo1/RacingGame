@@ -72,7 +72,7 @@ public class RaceWorld extends World {
 
         loadTrack();
 
-        raceManager = new RaceManager(this, mode, totalLaps, player1Team, player2Team);
+        raceManager = new RaceManager(this, mode, totalLaps, trackIndex, player1Team, player2Team);
         raceManager.setupRace();
     }
 

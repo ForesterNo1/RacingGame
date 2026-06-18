@@ -18,14 +18,14 @@ public class MenuWorld extends World {
 
     // Зоны кнопок [x, y, ширина, высота] — центр кнопки по спрайту Mainmenu.png
     // Координаты масштабированы с оригинала 1920x1080 (коэффициент 0.6667)
-    private static final int BTN_X  = 396;   // левый край кнопок
-    private static final int BTN_W  = 180;   // ширина кнопки
-    private static final int BTN_H  = 45;    // высота кнопки
+    private static final int BTN_X  = 527;   // левый край кнопок
+    private static final int BTN_W  = 225;   // ширина кнопки
+    private static final int BTN_H  = 55;    // высота кнопки
 
-    private static final int BTN_RACE_Y  = 320;
-    private static final int BTN_TIME_Y  = 377;
-    private static final int BTN_PVP_Y   = 432;
-    private static final int BTN_EXIT_Y  = 488;
+    private static final int BTN_RACE_Y  = 400;
+    private static final int BTN_TIME_Y  = 470;
+    private static final int BTN_PVP_Y   = 540;
+    private static final int BTN_EXIT_Y  = 605;
 
     private boolean mouseWasDown = false;
 

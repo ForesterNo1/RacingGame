@@ -14,14 +14,27 @@ import java.util.*;
 public class RaceManager {
 
     // ---------------------------------------------------------------
-    //  Стартовые позиции (3 слота — для трёх машин в Race)
+    //  Стартовые позиции по линии старта каждой трассы
+    //  Формат: {x, y} центра линии старта
     // ---------------------------------------------------------------
 
-    private static final int START_X_1 = 620;   // левая колонка
-    private static final int START_X_2 = 660;   // правая колонка
+    private static final int[][] START_LINE = {
+        {610, 145},  // 0 — Igora
+        {888, 610},  // 1 — Silverstone
+        {980, 370},  // 2 — Sochi
+    };
 
-    private static final int START_Y_1 = 627;   // первый ряд (ближе к финишной черте)
-    private static final int START_Y_2 = 653;   // второй ряд
+    /**
+     * Смещения вокруг линии старта для трёх машин (x-offset, y-offset).
+     * Классическая шахматная решётка: машины разнесены и по X и по Y
+     * достаточно, чтобы их хитбоксы не пересекались при спавне —
+     * иначе handleCarCollisions() сразу же откидывает их назад.
+     */
+    private static final int[][] GRID_OFFSETS = {
+        {0,   0},   // слот 0 (игрок) — по центру линии старта
+        {-35, 45},  // слот 1 — левее и позади
+        {35,  45},  // слот 2 — правее и позади
+    };
 
     // ---------------------------------------------------------------
     //  Поля
@@ -30,6 +43,7 @@ public class RaceManager {
     private final RaceWorld world;
     private final int       gameMode;
     private final int       totalLaps;
+    private final int       trackIndex;
     private final int       player1Team;
     private final int       player2Team;
 
@@ -45,11 +59,12 @@ public class RaceManager {
     //  Конструктор
     // ---------------------------------------------------------------
 
-    public RaceManager(RaceWorld world, int gameMode, int totalLaps,
+    public RaceManager(RaceWorld world, int gameMode, int totalLaps, int trackIndex,
                        int player1Team, int player2Team) {
         this.world       = world;
         this.gameMode    = gameMode;
         this.totalLaps   = totalLaps;
+        this.trackIndex  = trackIndex;
         this.player1Team = player1Team;
         this.player2Team = player2Team;
     }
@@ -80,44 +95,50 @@ public class RaceManager {
     // ---------------------------------------------------------------
 
     private void setupVsBots() {
-        // Игрок 1
+        int lineX = START_LINE[trackIndex][0];
+        int lineY = START_LINE[trackIndex][1];
+
+        // Игрок 1 — слот 0
         PlayerCar player = new PlayerCar(PlayerCar.SCHEME_ARROWS, 1,
                                          TeamSelectWorld.TEAM_SPRITES[player1Team]);
-        world.addObject(player, START_X_1, START_Y_1);
+        world.addObject(player, lineX + GRID_OFFSETS[0][0], lineY + GRID_OFFSETS[0][1]);
         players.add(player);
 
-        // 2 бота — команды которые игрок не взял
+        // 2 бота — команды которые игрок не взял, слоты 1 и 2
         List<Integer> botTeams = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             if (i != player1Team) botTeams.add(i);
         }
 
-        int[] startX = { START_X_2, START_X_1 };
-        int[] startY = { START_Y_1, START_Y_2 };
-
         for (int i = 0; i < botTeams.size(); i++) {
             String sprite = TeamSelectWorld.TEAM_SPRITES[botTeams.get(i)];
             BotCar bot    = new BotCar(BotCar.MEDIUM, i, sprite);
-            world.addObject(bot, startX[i], startY[i]);
+            int slot = i + 1;
+            world.addObject(bot, lineX + GRID_OFFSETS[slot][0], lineY + GRID_OFFSETS[slot][1]);
             bots.add(bot);
         }
     }
 
     private void setupTimeTrial() {
-        // Только игрок, без ботов
+        int lineX = START_LINE[trackIndex][0];
+        int lineY = START_LINE[trackIndex][1];
+
         PlayerCar player = new PlayerCar(PlayerCar.SCHEME_ARROWS, 1,
                                          TeamSelectWorld.TEAM_SPRITES[player1Team]);
-        world.addObject(player, START_X_1, START_Y_1);
+        world.addObject(player, lineX, lineY);
         players.add(player);
     }
 
     private void setupTwoPlayer() {
+        int lineX = START_LINE[trackIndex][0];
+        int lineY = START_LINE[trackIndex][1];
+
         PlayerCar p1 = new PlayerCar(PlayerCar.SCHEME_ARROWS, 1,
                                      TeamSelectWorld.TEAM_SPRITES[player1Team]);
         PlayerCar p2 = new PlayerCar(PlayerCar.SCHEME_WASD, 2,
                                      TeamSelectWorld.TEAM_SPRITES[player2Team]);
-        world.addObject(p1, START_X_1, START_Y_1);
-        world.addObject(p2, START_X_2, START_Y_1);
+        world.addObject(p1, lineX + GRID_OFFSETS[0][0], lineY + GRID_OFFSETS[0][1]);
+        world.addObject(p2, lineX + GRID_OFFSETS[1][0], lineY + GRID_OFFSETS[1][1]);
         players.add(p1);
         players.add(p2);
     }

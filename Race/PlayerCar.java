@@ -35,6 +35,15 @@ public class PlayerCar extends Car {
         readInput();
         handleCarCollisions();
         updatePhysics();
+        debugShowSpeed(); // ВРЕМЕННО: показываем speed для диагностики
+    }
+
+    /** ВРЕМЕННЫЙ метод для отладки — удалить после диагностики. */
+    private void debugShowSpeed() {
+        if (getWorld() == null) return;
+        getWorld().showText("speed=" + String.format("%.2f", speed) +
+                             " angle=" + String.format("%.0f", angle) +
+                             " x=" + getX() + " y=" + getY(), 200, 30);
     }
 
     // ---------------------------------------------------------------
