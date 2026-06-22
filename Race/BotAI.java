@@ -25,8 +25,8 @@ public class BotAI {
     private static final double[] ERROR_CHANCE     = { 0.008, 0.002, 0.0 }; // вероятность/кадр
     private static final double[] BRAKE_ANGLE      = { 35.0, 25.0, 18.0 }; // угол торможения
 
-    // Дистанция "достижения" чекпоинта (пиксели)
-    private static final int REACH_DISTANCE = 40;
+    // Дистанция "достижения" чекпоинта (пиксели) — увеличена чтобы бот не промахивался
+    private static final int REACH_DISTANCE = 80;
 
     // ---------------------------------------------------------------
     //  Поля
@@ -68,11 +68,12 @@ public class BotAI {
 
         Checkpoint target = waypoints.get(currentWaypointIndex);
 
-        // Проверяем достижение текущего чекпоинта
+        // Проверяем достижение текущего чекпоинта — переходим, но НЕ выходим из метода
         if (distanceTo(target) < REACH_DISTANCE) {
             currentWaypointIndex = (currentWaypointIndex + 1) % waypoints.size();
             errorActive = false;
-            return;
+            // Берём новую цель и продолжаем движение в этом же кадре
+            target = waypoints.get(currentWaypointIndex);
         }
 
         // Случайная ошибка (только EASY/MEDIUM)
@@ -88,7 +89,6 @@ public class BotAI {
         double diff          = normalizeAngle(angleToTarget - carAngle);
 
         if (errorActive) {
-            // Ошибка: рулим в противоположную сторону
             diff = -diff;
         }
 
@@ -101,9 +101,12 @@ public class BotAI {
             car.turnLeft();
         }
 
-        // Газ или тормоз (перед крутым поворотом притормозить)
+        // Газ или притормозить перед крутым поворотом.
+        // Важно: не используем brake() (он даёт задний ход и блокирует поворот),
+        // вместо этого просто не даём газ — трение само замедлит бота.
         if (Math.abs(diff) > BRAKE_ANGLE[difficulty]) {
-            car.brake();
+            // Не газуем, но и не тормозим — трение замедлит
+            // (brake() приводил к speed<0 и потере управления)
         } else {
             car.accelerate();
         }

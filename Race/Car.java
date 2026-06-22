@@ -9,11 +9,11 @@ import greenfoot.*;
 public abstract class Car extends Actor {
 
     // --- Физические константы ---
-    protected static final double MAX_SPEED        = 2.0;   // макс. скорость (пикс/кадр)
-    protected static final double ACCELERATION     = 0.18;  // ускорение при газе
-    protected static final double BRAKE_FORCE      = 0.25;  // замедление при тормозе
-    protected static final double FRICTION         = 0.06;  // пассивное трение (без газа)
-    protected static final double OFFROAD_DRAG     = 0.18;  // замедление при выезде за трассу
+    protected static final double MAX_SPEED        = 2.5;   // макс. скорость (пикс/кадр)
+    protected static final double ACCELERATION     = 0.09;  // ускорение при газе
+    protected static final double BRAKE_FORCE      = 0.12;  // замедление при тормозе
+    protected static final double FRICTION         = 0.03;  // пассивное трение (без газа)
+    protected static final double OFFROAD_DRAG     = 0.09;  // замедление при выезде за трассу
     protected static final double TURN_SPEED       = 3.5;   // градусов поворота в кадр
     protected static final double TURN_SPEED_SLOW  = 2.0;   // поворот на малой скорости
 
@@ -159,6 +159,16 @@ public abstract class Car extends Actor {
     public void setCheckpointsPassed(int cp)   { this.checkpointsPassed = cp; }
     public void setRaceTimeMs(long t)          { this.raceTimeMs = t; }
     public void setPosition(int pos)           { this.position = pos; }
+
+    /**
+     * Устанавливает начальный угол машины при старте.
+     * Вызывается из RaceManager после addObject().
+     * 0=вверх, 90=вправо, 180=вниз, 270=влево.
+     */
+    public void setStartAngle(int startAngle) {
+        this.angle = startAngle;
+        setRotation(startAngle);
+    }
 
     // ---------------------------------------------------------------
     //  Абстрактный act() — каждый подкласс реализует сам

@@ -3,19 +3,11 @@ import java.util.*;
 
 /**
  * Управляет созданием участников, режимами гонки и определением финиша.
- *
- * Изменения:
- *   - Принимает player1Team / player2Team из TeamSelectWorld.
- *   - Race: 1 игрок + 2 бота (команды которые игрок не взял).
- *   - Time Trial: 1 игрок, без ботов, круг 1 = прогревочный (не засчитывается).
- *   - PvP: 2 игрока, без ботов.
- *   - Спрайты машин берутся из TeamSelectWorld.TEAM_SPRITES.
  */
 public class RaceManager {
 
     // ---------------------------------------------------------------
     //  Стартовые позиции по линии старта каждой трассы
-    //  Формат: {x, y} центра линии старта
     // ---------------------------------------------------------------
 
     private static final int[][] START_LINE = {
@@ -25,15 +17,26 @@ public class RaceManager {
     };
 
     /**
+     * Угол старта машин для каждой трассы (в градусах).
+     * 0   = смотрит вверх
+     * 90  = смотрит вправо
+     * 180 = смотрит вниз
+     * 270 = смотрит влево
+     * Поставь нужные значения вместо нулей.
+     */
+    private static final int[] START_ANGLE = {
+        -243,  // Igora       — TODO: поставь нужный угол
+        -64,  // Silverstone — TODO: поставь нужный угол
+        240,  // Sochi       — TODO: поставь нужный угол
+    };
+
+    /**
      * Смещения вокруг линии старта для трёх машин (x-offset, y-offset).
-     * Классическая шахматная решётка: машины разнесены и по X и по Y
-     * достаточно, чтобы их хитбоксы не пересекались при спавне —
-     * иначе handleCarCollisions() сразу же откидывает их назад.
      */
     private static final int[][] GRID_OFFSETS = {
-        {0,   0},   // слот 0 (игрок) — по центру линии старта
-        {40, 0},  // слот 1 — левее и позади
-        {0,  40},  // слот 2 — правее и позади
+        {0,   0},   // слот 0 (игрок)
+        {40, 0},  // слот 1
+        {0,  40},  // слот 2
     };
 
     // ---------------------------------------------------------------
@@ -91,20 +94,29 @@ public class RaceManager {
     }
 
     // ---------------------------------------------------------------
+    //  Вспомогательный метод: спавн машины с нужным углом
+    // ---------------------------------------------------------------
+
+    private void spawnCar(Car car, int slot) {
+        int lineX = START_LINE[trackIndex][0];
+        int lineY = START_LINE[trackIndex][1];
+        int x = lineX + GRID_OFFSETS[slot][0];
+        int y = lineY + GRID_OFFSETS[slot][1];
+        world.addObject(car, x, y);
+        // Устанавливаем начальный угол поворота
+        car.setStartAngle(START_ANGLE[trackIndex]);
+    }
+
+    // ---------------------------------------------------------------
     //  Создание участников
     // ---------------------------------------------------------------
 
     private void setupVsBots() {
-        int lineX = START_LINE[trackIndex][0];
-        int lineY = START_LINE[trackIndex][1];
-
-        // Игрок 1 — слот 0
         PlayerCar player = new PlayerCar(PlayerCar.SCHEME_ARROWS, 1,
                                          TeamSelectWorld.TEAM_SPRITES[player1Team]);
-        world.addObject(player, lineX + GRID_OFFSETS[0][0], lineY + GRID_OFFSETS[0][1]);
+        spawnCar(player, 0);
         players.add(player);
 
-        // 2 бота — команды которые игрок не взял, слоты 1 и 2
         List<Integer> botTeams = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             if (i != player1Team) botTeams.add(i);
@@ -113,32 +125,25 @@ public class RaceManager {
         for (int i = 0; i < botTeams.size(); i++) {
             String sprite = TeamSelectWorld.TEAM_SPRITES[botTeams.get(i)];
             BotCar bot    = new BotCar(BotCar.MEDIUM, i, sprite);
-            int slot = i + 1;
-            world.addObject(bot, lineX + GRID_OFFSETS[slot][0], lineY + GRID_OFFSETS[slot][1]);
+            spawnCar(bot, i + 1);
             bots.add(bot);
         }
     }
 
     private void setupTimeTrial() {
-        int lineX = START_LINE[trackIndex][0];
-        int lineY = START_LINE[trackIndex][1];
-
         PlayerCar player = new PlayerCar(PlayerCar.SCHEME_ARROWS, 1,
                                          TeamSelectWorld.TEAM_SPRITES[player1Team]);
-        world.addObject(player, lineX, lineY);
+        spawnCar(player, 0);
         players.add(player);
     }
 
     private void setupTwoPlayer() {
-        int lineX = START_LINE[trackIndex][0];
-        int lineY = START_LINE[trackIndex][1];
-
         PlayerCar p1 = new PlayerCar(PlayerCar.SCHEME_ARROWS, 1,
                                      TeamSelectWorld.TEAM_SPRITES[player1Team]);
         PlayerCar p2 = new PlayerCar(PlayerCar.SCHEME_WASD, 2,
                                      TeamSelectWorld.TEAM_SPRITES[player2Team]);
-        world.addObject(p1, lineX + GRID_OFFSETS[0][0], lineY + GRID_OFFSETS[0][1]);
-        world.addObject(p2, lineX + GRID_OFFSETS[1][0], lineY + GRID_OFFSETS[1][1]);
+        spawnCar(p1, 0);
+        spawnCar(p2, 1);
         players.add(p1);
         players.add(p2);
     }
@@ -176,13 +181,11 @@ public class RaceManager {
         switch (gameMode) {
             case RaceWorld.MODE_VS_BOTS:
             case RaceWorld.MODE_TIME_TRIAL:
-                // Завершаем когда игрок финишировал
                 for (PlayerCar p : players) {
                     if (lapTimer.isFinished(p)) { shouldEnd = true; break; }
                 }
                 break;
             case RaceWorld.MODE_TWO_PLAYER:
-                // Завершаем когда ОБА игрока финишировали
                 shouldEnd = players.stream().allMatch(lapTimer::isFinished);
                 break;
         }
@@ -195,7 +198,6 @@ public class RaceManager {
         raceFinished = true;
         lapTimer.stop();
 
-        // Назначаем позиции незавершившим
         List<Car> allCars = new ArrayList<>();
         allCars.addAll(players);
         allCars.addAll(bots);

@@ -21,7 +21,7 @@ public class ResultWorld extends World {
     // Координаты масштабированы с оригинала 1920x1080 (коэффициент 0.6667)
     private static final int BTN_W = 367;
     private static final int BTN_H = 72;
-    private static final int BTN_X = 447;   // центр по X
+    private static final int BTN_X = 640;   // центр по X
     private static final int BTN_Y = 337;
 
     // ---------------------------------------------------------------
@@ -93,7 +93,7 @@ public class ResultWorld extends World {
         // Спрайт Timewin.png: "Ваше время:" ~ y=350
         // Спрайты P1win/P2win: имя ~ y=300
 
-        int textY = 307;  // Y для результата (подогнать если нужно)
+        int textY = 270;  // Y для результата (подогнать если нужно)
         Font font = new Font("Arial", true, false, 35);
 
         String value;

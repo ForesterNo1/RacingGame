@@ -36,8 +36,8 @@ public class RaceWorld extends World {
     //  HUD
     // ---------------------------------------------------------------
 
-    private static final int HUD_X     = 13;
-    private static final int HUD_Y     = 13;
+    private static final int HUD_X     = 1100;
+    private static final int HUD_Y     = 615;
     private static final int HUD_LINE  = 19;
 
     // ---------------------------------------------------------------
