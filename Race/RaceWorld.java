@@ -26,9 +26,11 @@ public class RaceWorld extends World {
     //  Детектирование дороги по цвету пикселя
     // ---------------------------------------------------------------
 
-    private static final int ROAD_MIN  = 30;
-    private static final int ROAD_MAX  = 80;
-    private static final int ROAD_DIFF = 25;
+    // Трассы нарисованы чёрными линиями на зелёном фоне.
+    // Чёрный/тёмный пиксель = дорога (avg < ROAD_MAX_DARK).
+    // Яркий зелёный пиксель = трава = offRoad.
+    private static final int ROAD_MAX_DARK = 100; // пиксели темнее этого — дорога
+    private static final int OFFROAD_GREEN_MIN = 80; // зелёный канал у травы явно выше
 
     // ---------------------------------------------------------------
     //  HUD
@@ -114,48 +116,83 @@ public class RaceWorld extends World {
      * Создаёт и добавляет чекпоинты для выбранной трассы.
      * Координаты подобраны под каждый трек при масштабе 1280x720.
      */
+    
     public List<Checkpoint> setupCheckpoints() {
+
         int[][] positions;
 
         switch (trackIndex) {
+
             case TrackSelectWorld.TRACK_SILVERSTONE:
+
                 positions = new int[][] {
-                    {640, 633},   // 0 — старт (низ)
-                    {1133, 467},  // 1 — правый низ
-                    {1067, 133},  // 2 — правый верх
-                    {640, 100},   // 3 — верх центр
-                    {200, 200},   // 4 — левый верх
-                    {147, 467},   // 5 — левый низ
+
+                    {885, 610},   // 0 — старт (низ)
+
+                    {360, 350},  // 1 — правый низ
+
+                    {80, 445},  // 2 — правый верх
+
+                    {960, 185},   // 3 — верх центр
+
+                    {1120, 490},   // 4 — левый верх
+
+                    
+
                 };
+
                 break;
+
             case TrackSelectWorld.TRACK_SOCHI:
+
                 positions = new int[][] {
-                    {933, 600},   // 0 — старт
-                    {1133, 400},  // 1
-                    {933, 167},   // 2
-                    {533, 167},   // 3
-                    {267, 333},   // 4
-                    {467, 600},   // 5
+
+                    {975, 365},   // 0 — старт
+
+                    {450, 670},  // 1
+
+                    {600, 565},   // 2
+
+                    {1140, 80},   // 3
+
+                    
+
                 };
+
                 break;
+
             default: // IGORA
+
                 positions = new int[][] {
-                    {640, 600},   // 0 — старт
-                    {1067, 400},  // 1
-                    {933, 133},   // 2
-                    {400, 133},   // 3
-                    {200, 400},   // 4
+
+                    {605, 150},   // 0 — старт
+
+                    {1040, 535},  // 1
+
+                    {360, 605},   // 2
+
+                    {310, 405}
+
                 };
+
                 break;
+
         }
 
         List<Checkpoint> list = new ArrayList<>();
+
         for (int i = 0; i < positions.length; i++) {
+
             Checkpoint cp = new Checkpoint(i);
+
             addObject(cp, positions[i][0], positions[i][1]);
+
             list.add(cp);
+
         }
+
         return list;
+
     }
 
     // ---------------------------------------------------------------
@@ -194,10 +231,15 @@ public class RaceWorld extends World {
 
     private boolean isRoadPixel(Color c) {
         int r = c.getRed(), g = c.getGreen(), b = c.getBlue();
-        int maxDiff = Math.max(Math.abs(r-g), Math.max(Math.abs(r-b), Math.abs(g-b)));
-        if (maxDiff > ROAD_DIFF) return false;
         int avg = (r + g + b) / 3;
-        return avg >= ROAD_MIN && avg <= ROAD_MAX;
+        // Дорога = тёмный пиксель (чёрная линия трассы)
+        // Трава = яркий зелёный пиксель (g >> r и g >> b)
+        // Если пиксель тёмный — это дорога
+        if (avg < ROAD_MAX_DARK) return true;
+        // Если зелёный канал значительно доминирует — это трава
+        if (g > r + 30 && g > b + 30 && g > OFFROAD_GREEN_MIN) return false;
+        // Всё остальное (бежевое, серое, декоративное) — тоже считаем дорогой
+        return true;
     }
 
     // ---------------------------------------------------------------

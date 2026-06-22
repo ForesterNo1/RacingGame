@@ -9,7 +9,7 @@ import greenfoot.*;
 public abstract class Car extends Actor {
 
     // --- Физические константы ---
-    protected static final double MAX_SPEED        = 5.0;   // макс. скорость (пикс/кадр)
+    protected static final double MAX_SPEED        = 2.0;   // макс. скорость (пикс/кадр)
     protected static final double ACCELERATION     = 0.18;  // ускорение при газе
     protected static final double BRAKE_FORCE      = 0.25;  // замедление при тормозе
     protected static final double FRICTION         = 0.06;  // пассивное трение (без газа)

@@ -19,10 +19,10 @@ public class ResultWorld extends World {
 
     // Зона кнопки "В меню" — подобрана под спрайты Win/Timewin/P1win/P2win
     // Координаты масштабированы с оригинала 1920x1080 (коэффициент 0.6667)
-    private static final int BTN_W = 227;
-    private static final int BTN_H = 53;
-    private static final int BTN_X = (W - BTN_W) / 2;   // центр по X
-    private static final int BTN_Y = 400;
+    private static final int BTN_W = 367;
+    private static final int BTN_H = 72;
+    private static final int BTN_X = 447;   // центр по X
+    private static final int BTN_Y = 337;
 
     // ---------------------------------------------------------------
     //  Поля
@@ -66,16 +66,16 @@ public class ResultWorld extends World {
     private String chooseBgFile() {
         switch (gameMode) {
             case RaceWorld.MODE_TIME_TRIAL:
-                return "Timewin.png";
+                return "images/Assets/Menu/Timewin.png";
             case RaceWorld.MODE_TWO_PLAYER:
                 // Победитель — игрок с местом 1
                 if (!results.isEmpty()) {
                     String winner = results.get(0).getName();
-                    return winner.contains("2") ? "P2win.png" : "P1win.png";
+                    return winner.contains("2") ? "images/Assets/Menu/P2win.png" : "images/Assets/Menu/P1win.png";
                 }
-                return "P1win.png";
+                return "images/Assets/Menu/P1win.png";
             default: // MODE_VS_BOTS
-                return "Win.png";
+                return "images/Assets/Menu/Win.png";
         }
     }
 
